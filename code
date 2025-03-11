@@ -1,0 +1,91 @@
+import csv
+import os
+
+FILENAME = "bibliotheque.csv"
+HEADER = ["Genre", "Auteur", "Année", "Titre", "Emprunté"]
+GENRES_VALIDES = ["Roman", "Science-fiction", "Fantastique", "Policier", "Historique", "Biographie", "Philosophie", "Essai"]
+
+# Fonction pour charger les livres depuis le fichier CSV
+def charger_livres():
+    if not os.path.exists(FILENAME):
+        with open(FILENAME, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(HEADER)
+        return []
+    
+    with open(FILENAME, "r", newline="", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        livres = list(reader)
+    
+    if livres and livres[0] == HEADER:
+        return livres[1:]  # Exclure l'en-tête
+    return livres
+
+# Fonction pour enregistrer les livres dans le fichier CSV
+def sauvegarder_livres(livres):
+    with open(FILENAME, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(HEADER)
+        writer.writerows(livres)
+
+# Fonction pour trier les livres par Genre -> Auteur -> Année
+def trier_livres(livres):
+    return sorted(livres, key=lambda x: (x[0].lower(), x[1].lower(), int(x[2])))
+
+# Fonction pour ajouter un livre
+def ajouter_livre():
+    print("\nGenres disponibles :")
+    for i, genre in enumerate(GENRES_VALIDES, start=1):
+        print(f"{i}. {genre}")
+
+    while True:
+        choix_genre = input("\nChoisissez un numéro pour le genre : ").strip()
+        if choix_genre.isdigit() and 1 <= int(choix_genre) <= len(GENRES_VALIDES):
+            genre = GENRES_VALIDES[int(choix_genre) - 1]
+            break
+        print("⚠️ Veuillez entrer un numéro valide.")
+
+    auteur = input("Auteur du livre : ").strip()
+    annee = input("Année de publication : ").strip()
+    titre = input("Titre du livre : ").strip()
+
+    while True:
+        emprunte = input("Emprunté ? (oui/non) : ").strip().lower()
+        if emprunte in ["oui", "non"]:
+            break
+        print("⚠️ Veuillez entrer 'oui' ou 'non'.")
+
+    livres = charger_livres()
+    livres.append([genre, auteur, annee, titre, emprunte])
+    livres = trier_livres(livres)
+    sauvegarder_livres(livres)
+
+    print("\n✅ Livre ajouté et bibliothèque mise à jour !\n")
+
+# Fonction principale
+def main():
+    while True:
+        print("\n1. Ajouter un livre")
+        print("2. Afficher la bibliothèque")
+        print("3. Quitter")
+        choix = input("Choisissez une option : ").strip()
+
+        if choix == "1":
+            ajouter_livre()
+        elif choix == "2":
+            livres = charger_livres()
+            if not livres:
+                print("\n📚 La bibliothèque est vide.\n")
+            else:
+                print("\n📖 Bibliothèque triée :")
+                for livre in livres:
+                    print(livre)
+        elif choix == "3":
+            print("\n👋 Au revoir !")
+            break
+        else:
+            print("\n⚠️ Option invalide, veuillez entrer 1, 2 ou 3.\n")
+
+# Exécuter le programme
+if __name__ == "__main__":
+    main()
